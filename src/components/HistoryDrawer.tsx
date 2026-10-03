@@ -130,8 +130,17 @@ export const HistoryDrawer: React.FC<HistoryDrawerProps> = ({
                 >
                   <div className="flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500">
                     <span className="font-mono">
-                      {item.sourceLanguage === 'ru' ? '🇷🇺 Ruscha' : '🇬🇧 Inglizcha'} →{' '}
-                      {item.targetLanguage === 'ru' ? '🇷🇺 Ruscha' : '🇬🇧 Inglizcha'}
+                      {item.sourceLanguage === 'uz'
+                        ? '🇺🇿 O‘zbekcha'
+                        : item.sourceLanguage === 'ru'
+                        ? '🇷🇺 Ruscha'
+                        : '🇬🇧 Inglizcha'}{' '}
+                      →{' '}
+                      {item.targetLanguage === 'uz'
+                        ? '🇺🇿 O‘zbekcha'
+                        : item.targetLanguage === 'ru'
+                        ? '🇷🇺 Ruscha'
+                        : '🇬🇧 Inglizcha'}
                     </span>
                     <div className="flex items-center gap-1">
                       <button

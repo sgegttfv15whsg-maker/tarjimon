@@ -252,13 +252,28 @@ export default function App() {
     }
   };
 
+  // Reverse translate from output
+  const handleReverseTranslate = () => {
+    if (!translationResult?.translation) return;
+    const textToReverse = translationResult.translation;
+    const currentActualSource = sourceLang === 'auto' ? (detectedLang || 'uz') : sourceLang;
+    const newSource = targetLang;
+    const newTarget = currentActualSource;
+
+    handleStopSpeaking();
+    setSourceLang(newSource);
+    setTargetLang(newTarget);
+    setInputText(textToReverse);
+    handleTranslate(textToReverse, newSource, newTarget, tone);
+  };
+
   // Switch to specific pair shortcut
   const handleSelectPair = (s: LanguageCode, t: LanguageCode) => {
     handleStopSpeaking();
     setSourceLang(s);
     setTargetLang(t);
     if (inputText.trim()) {
-      handleTranslate(inputText, s, t);
+      handleTranslate(inputText, s, t, tone);
     }
   };
 
@@ -272,7 +287,7 @@ export default function App() {
     setSourceLang(suggestedSource);
     setTargetLang(newTarget);
     if (inputText.trim()) {
-      handleTranslate(inputText, suggestedSource, newTarget);
+      handleTranslate(inputText, suggestedSource, newTarget, tone);
     }
   };
 
@@ -280,7 +295,8 @@ export default function App() {
   const handleTranslate = async (
     overrideText?: string,
     overrideSource?: SourceLanguageOption,
-    overrideTarget?: LanguageCode
+    overrideTarget?: LanguageCode,
+    overrideTone?: TranslationTone
   ) => {
     const textToTranslate = (overrideText !== undefined ? overrideText : inputText).trim();
 
@@ -295,6 +311,7 @@ export default function App() {
 
     const activeSourceOption = overrideSource || sourceLang;
     let effectiveTarget = overrideTarget || targetLang;
+    const activeTone = overrideTone || tone;
 
     // Detect actual source language
     let effectiveSource: LanguageCode = activeSourceOption === 'auto'
@@ -321,7 +338,7 @@ export default function App() {
           text: textToTranslate,
           from: activeSourceOption,
           to: effectiveTarget,
-          tone: tone,
+          tone: activeTone,
         }),
       });
 
@@ -336,7 +353,7 @@ export default function App() {
         translation: data.translation,
         sourceLanguage: data.detectedSourceLanguage || effectiveSource,
         targetLanguage: data.targetLanguage || effectiveTarget,
-        tone: tone,
+        tone: activeTone,
         partOfSpeech: data.partOfSpeech,
         transliteration: data.transliteration,
         alternatives: data.alternatives,
@@ -416,14 +433,6 @@ export default function App() {
       )
   );
 
-  // Reverse translate from output
-  const handleReverseTranslate = () => {
-    if (!translationResult?.translation) return;
-    const textToReverse = translationResult.translation;
-    handleSwapLanguages();
-    handleTranslate(textToReverse);
-  };
-
   // Load from History
   const handleSelectHistoryItem = (item: HistoryItem) => {
     handleStopSpeaking();
@@ -438,7 +447,7 @@ export default function App() {
   const handleSelectSample = (sampleText: string) => {
     handleStopSpeaking();
     setInputText(sampleText);
-    handleTranslate(sampleText);
+    handleTranslate(sampleText, sourceLang, targetLang, tone);
   };
 
   // Tone change
@@ -446,7 +455,7 @@ export default function App() {
     setTone(newTone);
     localStorage.setItem(STORAGE_KEYS.TONE, newTone);
     if (inputText.trim()) {
-      handleTranslate();
+      handleTranslate(inputText, sourceLang, targetLang, newTone);
     }
   };
 
