@@ -202,7 +202,7 @@ function cleanTranslationText(text: string): string {
 }
 
 // API: Translation endpoint
-app.post('/api/translate', async (req, res) => {
+app.post(['/api/translate', '/translate'], async (req, res) => {
   try {
     const { text, from = 'auto', to = 'en', tone = 'standard' } = req.body as TranslateRequestBody;
 
@@ -420,7 +420,7 @@ ${trimmedText}
 });
 
 // API: Language detector
-app.post('/api/detect', (req, res) => {
+app.post(['/api/detect', '/detect'], (req, res) => {
   const { text } = req.body;
   if (!text || typeof text !== 'string') {
     return res.json({ language: 'unknown' });
@@ -431,6 +431,18 @@ app.post('/api/detect', (req, res) => {
     confidence: 0.95,
   });
 });
+
+// API: Health check endpoint
+app.get(['/api/health', '/health'], (req, res) => {
+  res.json({
+    status: 'ok',
+    version: '1.0.0',
+    timestamp: Date.now(),
+  });
+});
+
+// Export app for Vercel Serverless Function and testing
+export default app;
 
 // Setup Vite middleware in dev or static files in production
 async function startServer() {
@@ -455,7 +467,11 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('Failed to start server:', err);
-  process.exit(1);
-});
+// Only start standalone HTTP server when not running in Vercel serverless environment
+if (!process.env.VERCEL) {
+  startServer().catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  });
+}
+
